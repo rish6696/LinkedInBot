@@ -1,0 +1,6 @@
+So everytime I turned to solve questions on leetcode,
+I always thought there should be an option to 
+sort the problems on the basis of difficultly level.
+
+So I wrote a script and made it an extension for the chrome.
+
