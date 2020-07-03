@@ -4,7 +4,7 @@ var random_useragent = require('random-useragent');
 async function main() {
   try {
 
-    const browser = await puppeteer.launch({ slowMo: 70, headless: false })
+    const browser = await puppeteer.launch({ slowMo: 250, headless: false })
 
     //const browser = await puppeteer.launch( { headless:false, args: [ "--no-sandbox", "--headless", "--disable-gpu", "--window-size=1920x1080" ] } )
     const page = await browser.newPage();
@@ -22,12 +22,9 @@ async function main() {
     const linkObject = await href.getProperty('href')
     const link = linkObject._remoteObject.value;
     //console.log(link)
-
-
-
     await page.goto(link)
 
-    await page.type('#username', 'rish6696.rs@gmail.com');
+    await page.type('#username', 'rishabhsharmadevopler@gmail.com');
     await page.type('#password', 'sharma78');
 
     const form = await page.$('.login__form');
@@ -36,14 +33,22 @@ async function main() {
     })
 
 
-    await page.waitForNavigation();
-    await page.waitForSelector('#ember41 input', { timeout: 100000 })
-    await page.type('#ember41 input', 'apple')
+    await page.waitForNavigation({timeout:100000});
+    await page.waitForSelector('.search-global-typeahead__input.always-show-placeholder', { timeout: 100000 })
+    await page.type('.search-global-typeahead__input.always-show-placeholder', 'food')
+
+   
 
     await page.keyboard.press('Enter');
-    //   await page.waitForNavigation({waitUntil:'networkidle2'})
+    await page.waitForNavigation({waitUntil:'networkidle2'})
 
     await page.waitForSelector('.blended-srp-results-js', { timeout: 100000 })
+
+    const buttonCollections = await page.$$('.search-vertical-filter__filter-item-button.artdeco-button.artdeco-button--muted.artdeco-button--2.artdeco-button--tertiary.ember-view')
+    const peopleButton = buttonCollections[0];
+    await peopleButton.click()
+    await page.waitForNavigation({timeout:100000});
+
 
     async function autoScroll(page) {
       await page.evaluate(async () => {
@@ -67,20 +72,29 @@ async function main() {
 
    let cont= true;
    while(cont){
+    await page.waitForSelector('.search-result__actions');
     let  divArray = await page.$$('.search-result__actions');
     for (let d of divArray) {
       let button = await d.$('button');
-      const text = await page.evaluate(element => element.textContent, button);
+      const text = await page.evaluate((element)=>{
+        if(element){
+          return element.textContent
+        }
+        return "";
+      }, button);
      // console.log(text.trim());
       const b = text.trim().localeCompare("Connect");
       //console.log(b);
       if (b == 0) {
         console.log("clcicking for " ,text.trim() )
         button.click();
-        await page.waitForSelector('.ml1.artdeco-button.artdeco-button--3.artdeco-button--primary.ember-view', 10000)
-        let conf = await page.$('.ml1.artdeco-button.artdeco-button--3.artdeco-button--primary.ember-view')
+        await page.waitForSelector('.mr1.artdeco-button.artdeco-button--muted.artdeco-button--3.artdeco-button--secondary.ember-view', 10000)
+        let conf = await page.$('.mr1.artdeco-button.artdeco-button--muted.artdeco-button--3.artdeco-button--secondary.ember-view')
         conf.click();
-        console.log("clicked for connection in main script");
+        await page.waitForSelector('#custom-message')
+        await page.type('#custom-message',"hello")
+        const donemsgButton = await page.$('.ml1.artdeco-button.artdeco-button--3.artdeco-button--primary.ember-view')
+        await donemsgButton.click()
         await autoScroll(page);
         divArray = await page.$$('.search-result__actions');
       }
@@ -111,7 +125,5 @@ async function main() {
     console.log(error)
     // await page.waitForSelector('#Expertresults',{timeout:5000}); 
   }
-
-
 }
 main();
